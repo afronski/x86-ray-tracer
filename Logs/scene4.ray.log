@@ -1,0 +1,8 @@
+x86RayTracer                   (author: Wojtek 'afronski' Gawronski)
+Contact: afronski@gmail.com                    Version: 0.4-sapphire
+   Scene:             Scenes/scene4.ray
+   Ouput:             Render/scene4.bmp
+   Presentation time: 0
+   Measured time:     0.355590s
+   Rays/s:            1.799824M
+   Intersections/s:   3.599649M

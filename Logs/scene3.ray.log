@@ -1,0 +1,8 @@
+x86RayTracer                   (author: Wojtek 'afronski' Gawronski)
+Contact: afronski@gmail.com                    Version: 0.4-sapphire
+   Scene:             Scenes/scene3.ray
+   Ouput:             Render/scene3.bmp
+   Presentation time: 0
+   Measured time:     0.427152s
+   Rays/s:            1.498295M
+   Intersections/s:   13.484656M
