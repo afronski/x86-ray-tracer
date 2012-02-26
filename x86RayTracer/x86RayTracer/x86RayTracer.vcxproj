@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{92C0E84C-9D2F-4804-B5E8-F10B390B79B6}</ProjectGuid>
+    <RootNamespace>x86RayTracer</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">D:\C++\SDL-1.2.14\include;D:\C++\SDL_image-1.2.10\include;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\C++\SDL-1.2.14\include;D:\C++\SDL_image-1.2.10\include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">D:\C++\SDL_image-1.2.10\lib;D:\C++\SDL-1.2.14\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\C++\SDL_image-1.2.10\lib;D:\C++\SDL-1.2.14\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>D:\Projects\JA Project\x86RayTracer\x86RayTracer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>..\Debug\ASMx86RayTracer.lib;lib\SDL.lib;lib\SDLmain.lib;lib\SDL_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>D:\Projects\JA Project\x86RayTracer\x86RayTracer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>..\Release\ASMx86RayTracer.lib;lib\SDL.lib;lib\SDLmain.lib;lib\SDL_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="include\InputFileParser.hpp" />
+    <ClInclude Include="include\main.hpp" />
+    <ClInclude Include="include\SDL\begin_code.h" />
+    <ClInclude Include="include\SDL\close_code.h" />
+    <ClInclude Include="include\SDL\SDL.h" />
+    <ClInclude Include="include\SDL\SDL_active.h" />
+    <ClInclude Include="include\SDL\SDL_audio.h" />
+    <ClInclude Include="include\SDL\SDL_byteorder.h" />
+    <ClInclude Include="include\SDL\SDL_cdrom.h" />
+    <ClInclude Include="include\SDL\SDL_config.h" />
+    <ClInclude Include="include\SDL\SDL_config_amiga.h" />
+    <ClInclude Include="include\SDL\SDL_config_dreamcast.h" />
+    <ClInclude Include="include\SDL\SDL_config_macos.h" />
+    <ClInclude Include="include\SDL\SDL_config_macosx.h" />
+    <ClInclude Include="include\SDL\SDL_config_minimal.h" />
+    <ClInclude Include="include\SDL\SDL_config_nds.h" />
+    <ClInclude Include="include\SDL\SDL_config_os2.h" />
+    <ClInclude Include="include\SDL\SDL_config_symbian.h" />
+    <ClInclude Include="include\SDL\SDL_config_win32.h" />
+    <ClInclude Include="include\SDL\SDL_copying.h" />
+    <ClInclude Include="include\SDL\SDL_cpuinfo.h" />
+    <ClInclude Include="include\SDL\SDL_endian.h" />
+    <ClInclude Include="include\SDL\SDL_error.h" />
+    <ClInclude Include="include\SDL\SDL_events.h" />
+    <ClInclude Include="include\SDL\SDL_getenv.h" />
+    <ClInclude Include="include\SDL\SDL_image.h" />
+    <ClInclude Include="include\SDL\SDL_joystick.h" />
+    <ClInclude Include="include\SDL\SDL_keyboard.h" />
+    <ClInclude Include="include\SDL\SDL_keysym.h" />
+    <ClInclude Include="include\SDL\SDL_loadso.h" />
+    <ClInclude Include="include\SDL\SDL_main.h" />
+    <ClInclude Include="include\SDL\SDL_mouse.h" />
+    <ClInclude Include="include\SDL\SDL_mutex.h" />
+    <ClInclude Include="include\SDL\SDL_name.h" />
+    <ClInclude Include="include\SDL\SDL_opengl.h" />
+    <ClInclude Include="include\SDL\SDL_platform.h" />
+    <ClInclude Include="include\SDL\SDL_quit.h" />
+    <ClInclude Include="include\SDL\SDL_rwops.h" />
+    <ClInclude Include="include\SDL\SDL_stdinc.h" />
+    <ClInclude Include="include\SDL\SDL_syswm.h" />
+    <ClInclude Include="include\SDL\SDL_thread.h" />
+    <ClInclude Include="include\SDL\SDL_timer.h" />
+    <ClInclude Include="include\SDL\SDL_types.h" />
+    <ClInclude Include="include\SDL\SDL_version.h" />
+    <ClInclude Include="include\SDL\SDL_video.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\InputFileParser.cpp" />
+    <ClCompile Include="src\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ASMx86RayTracer\ASMx86RayTracer.vcxproj">
+      <Project>{798f1c5f-6fc9-41a0-afbc-d2ca1a0775d2}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

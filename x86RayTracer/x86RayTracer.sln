@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "x86RayTracer", "x86RayTracer\x86RayTracer.vcxproj", "{92C0E84C-9D2F-4804-B5E8-F10B390B79B6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ASMx86RayTracer", "ASMx86RayTracer\ASMx86RayTracer.vcxproj", "{798F1C5F-6FC9-41A0-AFBC-D2CA1A0775D2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{92C0E84C-9D2F-4804-B5E8-F10B390B79B6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{92C0E84C-9D2F-4804-B5E8-F10B390B79B6}.Debug|Win32.Build.0 = Debug|Win32
+		{92C0E84C-9D2F-4804-B5E8-F10B390B79B6}.Release|Win32.ActiveCfg = Release|Win32
+		{92C0E84C-9D2F-4804-B5E8-F10B390B79B6}.Release|Win32.Build.0 = Release|Win32
+		{798F1C5F-6FC9-41A0-AFBC-D2CA1A0775D2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{798F1C5F-6FC9-41A0-AFBC-D2CA1A0775D2}.Debug|Win32.Build.0 = Debug|Win32
+		{798F1C5F-6FC9-41A0-AFBC-D2CA1A0775D2}.Release|Win32.ActiveCfg = Release|Win32
+		{798F1C5F-6FC9-41A0-AFBC-D2CA1A0775D2}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

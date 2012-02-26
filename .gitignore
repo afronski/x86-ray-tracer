@@ -1,0 +1,11 @@
+_ReSharper.*
+*.sdf
+*.user
+*.suo
+ipch
+Release
+Debug
+bin
+obj
+*.opensdf
+*.vs10x

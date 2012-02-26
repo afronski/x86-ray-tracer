@@ -1,0 +1,4 @@
+LIBRARY ASMx86RayTracer
+
+EXPORTS
+	Render
