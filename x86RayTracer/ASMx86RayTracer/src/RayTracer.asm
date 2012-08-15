@@ -90,17 +90,17 @@ Render			PROC _FrameWidth : DWORD , _FrameHeight : DWORD, _Screen : DWORD,
 				MOV dword ptr [CameraPosition + 24], EAX
 				MOV dword ptr [CameraPosition + 28], EAX
 
-				; Czyszczenie bufora kolorów.
+				; Clearing color buffer.
 				CALL ClearScreen
 
-				; Renderowanie calej sceny.
+				; Rendering whole scene.
 				CALL RayTraceAll
 
 				POPAD
 				RET
 Render			ENDP
 
-; Parametr: XMM0, Wyzerowac 4 qw.
+; Parameter: XMM0 (clear 4 qw).
 Normalize		PROC
 				MOVAPS xmm1, xmm0
 				MOVAPS xmm2, xmm1
@@ -108,16 +108,16 @@ Normalize		PROC
 				MOVSHDUP xmm2, xmm1				; XMM2 = y2
 				ADDPS xmm1,	xmm2
 				MOVHLPS xmm2, xmm1
-				ADDPS xmm1,xmm2					; XMM0 = mamy dlugosc do kwadratu
+				ADDPS xmm1,xmm2					; XMM0 = distance ^ 2
 
-				; Pierwiastek, odwrócenie i sklonowanie - potem wymnozyc przez XMM0.
+				; Root, inversion and copying - than multiplicate by XMM0.
 				RSQRTSS xmm1, xmm1
-				PSHUFD xmm1, xmm1, 0			; Klonowanie xmm1.
-				MULPS xmm0, xmm1				; Dzielenie przez dlugoœæ.
+				PSHUFD xmm1, xmm1, 0			; Copying xmm1.
+				MULPS xmm0, xmm1				; Dividing by length.
 				RET
 Normalize		ENDP
 
-; Parametr: XMM0
+; Parameter: XMM0
 Length2			PROC
 				MOVAPS xmm1, xmm0
 				MULPS  xmm0, xmm1				; XMM1 = dot product XMM0
@@ -139,7 +139,7 @@ FLength			PROC
 				RET
 FLength			ENDP
 
-; Parametry: XMM0, XMM1
+; Parameters: XMM0, XMM1
 DotProduct		PROC
 				MULPS  xmm0, xmm1
 				MOVSHDUP xmm1, xmm0
@@ -149,18 +149,18 @@ DotProduct		PROC
 				RET
 DotProduct		ENDP
 
-; Parametry: XMM0, XMM1 (XMM0 x XMM1)
+; Parameters: XMM0, XMM1 (XMM0 x XMM1)
 CrossProduct	PROC
 				PSHUFD xmm2, xmm1, 0C9H
-				MULPS xmm2, xmm0				; W XMM2 mamy 1 mnozenie.
+				MULPS xmm2, xmm0				; In XMM2 we have second mul result.
 				PSHUFD xmm0, xmm0, 0C9H
-				MULPS xmm0, xmm1				; W XMM0 mamy 2 mnozenie.
+				MULPS xmm0, xmm1				; In XMM0 we have second mul result.
 				SUBPS xmm2, xmm0
 				PSHUFD xmm0, xmm2, 0C9H
 				RET
 CrossProduct	ENDP
 
-; Czyszczenie bufora kolorów.
+; Clearing color buffer.
 ClearScreen		PROC
 				PUSHAD
 	
@@ -193,7 +193,7 @@ ClearScreenLoop:
 				RET
 ClearScreen		ENDP
 
-; Rendering ca³ej sceny.
+; Rendering whole scene.
 RayTraceAll		PROC
 				PUSHAD
 				MOV EAX,FrameHeight
@@ -202,7 +202,7 @@ loop_through_y:
 				DEC EAX
 				PUSH EAX
 
-				; ustawianie promienia
+				; Setting ray (Y coordinate).
 				CVTSI2SD xmm7, [FrameHeight]
 				CVTSI2SD xmm6, EAX
 				CVTSS2SD xmm5, [S_SY]
@@ -217,7 +217,7 @@ loop_through_y:
 loop_through_x:
 				PUSH ECX
 
-				; ustawianie promienia
+				; Setting ray (X coordinate).
 				CVTSI2SD xmm7, [FrameWidth]
 				CVTSI2SD xmm6, ECX
 				CVTSS2SD xmm5, [S_SX]
@@ -228,13 +228,13 @@ loop_through_x:
 				SUBSD xmm4, xmm5
 				MOVSD [S_CX], xmm4
 
-				; EAX, ECX - liczniki ale tez sa na stosie.
-				;	S_CX ray direction
-				;	CameraPos - pozycja kamery
-				;	EDX - offset tabeli z kolorami
-				;		zostaje EAX, EBX, ECX :)
+				;   EAX, ECX - counters, but they're also on the stack.
+				;	S_CX - ray direction
+				;	CameraPos - camera position
+				;	EDX - offset for colors table
+				;		Empty registers - EAX, EBX, ECX :)
 
-				; Normalizacja.
+				; Normalization.
 				MOVAPD xmm0, [S_CX]
 				MOVAPD xmm1, [S_CX+16]
 				MOVAPD xmm2, xmm0
@@ -251,7 +251,7 @@ loop_through_x:
 
 				Call CalcRayIntersections
 
-				; Sprawdzone wszystkie kolizje, teraz trzeba wyswietlic.
+				; Collistions calculated so now we should display results.
 				MOV ESI, [NearestEsi]
 				OR ESI, 0
 				JZ nothing_to_display
@@ -264,17 +264,17 @@ loop_through_x:
 				AND EAX, 0F00000h
 				CMP EAX, 0300000h
 				JNZ rta_its_not_cylinder
-				MOVAPS xmm0, [ESI + 64]						; Aktualny kolor.
+				MOVAPS xmm0, [ESI + 64]						; Current color.
 				JMP rta_end_color
 
 rta_its_not_cylinder:
 				CMP EAX, 0400000h
 				JNZ rta_its_not_disc
-				MOVAPS xmm0, [ESI + 80]						; Aktualny kolor.
+				MOVAPS xmm0, [ESI + 80]						; Current color.
 				JMP rta_end_color
 
 rta_its_not_disc:
-				MOVAPS xmm0, [ESI + 48]						; Aktualny kolor.
+				MOVAPS xmm0, [ESI + 48]						; Current color.
 				JMP rta_end_color
 
 rta_end_color:
@@ -283,7 +283,7 @@ rta_end_color:
 				MOVAPS [EDX], xmm0
 
 nothing_to_display:
-				; Koniec wyswietlania.
+				; Nothing to display, time to finish all up.
 				ADD EDX,16
 				POP ECX
 				LOOP loop_through_xshort
@@ -300,20 +300,20 @@ loop_through_xshort:
 
 RayTraceAll		ENDP
 
-; Obliczanie przeciêæ promieni.
-; Parametry: XMM7 - punkt zaczepienia, XMM6 - wektor kierunkowy.
+; Calculating ray intersections.
+; Parameters: XMM7 - starting point, XMM6 - directional vector.
 CalcRayIntersections	PROC
 						XOR EAX, EAX
-						MOV [NearestESI],EAX		; Czyszczenie.
+						MOV [NearestESI],EAX		; Clearing.
 
 						MOV ESI, Primitives
-						MOV ECX, [ESI]				; Czytamy liczbê prymitywów.
+						MOV ECX, [ESI]				; Read amount of objects.
 
 primitives_1:
-						MOV EAX, [ESI + 12]			; Czytamy flage aktualnego obiektu.
+						MOV EAX, [ESI + 12]			; Read flag of current object.
 						PUSH EAX
 
-						AND EAX, 0F00000H			; Sprawdzamy rodzaj figury.
+						AND EAX, 0F00000H			; Checking for type of object.
 						CMP EAX, 0100000H			; Plane?
 						JNZ not_plane_1
 
@@ -322,14 +322,13 @@ primitives_1:
 						OR EAX, 0
 						JZ end_primitives_1
 
-						; Sprawdzenie czy aktualny jest bli¿ej od poprzedniego.
-						; Najpierw sprawdzam czy zosta³o cos wczeœniej ustawione.
-
+                        ; Checking is actual object closer than last.
+                        ; Checking is something set earlier.
 						MOV EAX, [NearestESI]
 						OR EAX, 0
-						JZ result_1					; Nie zostalo ustawione wiec od razu wpisuje.
+						JZ result_1					; Not zero so return result now.
 
-						; Sprawdzenie odleg³oœci.
+						; Checking distance.
 						MOVQ xmm0, [NearestDistance]
 						SUBSD xmm0, xmm5
 						MOVMSKPD EAX, xmm0
@@ -346,13 +345,13 @@ not_plane_1:
 						OR EAX, 0
 						JZ end_primitives_1
 
-						; Sprawdzenie czy aktualny jest bli¿ej od poprzedniego.
-						; Najpierw sprawdzam czy zosta³o cos wczeœniej ustawione.
+                        ; Checking is actual object closer than last.
+                        ; Checking is something set earlier.
 						MOV EAX, [NearestESI]
 						OR EAX, 0
-						JZ result_1					; Nie zostalo ustawione wiec od razu wpisuje.
+						JZ result_1					; Not zero so return result now.
 			
-						; Sprawdzenie odleg³oœci.
+						; Checking distance.
 						MOVQ xmm0, [NearestDistance]
 						SUBSD xmm0, xmm5
 						MOVMSKPD EAX, xmm0
@@ -371,9 +370,9 @@ not_ball_1:
 
 						MOV EAX, [NearestESI]
 						OR EAX,0
-						JZ result_1					; Nie zostalo ustawione wiec od razu wpisuje.
+						JZ result_1					; Not zero so return result now.
 			
-						; Sprawdzenie odleg³oœci.
+						; Checking distance.
 						MOVQ xmm0, [NearestDistance]
 						SUBSD xmm0, xmm5
 						MOVMSKPD EAX, xmm0
@@ -385,16 +384,16 @@ not_cylinder_1:
 						CMP EAX, 0400000H			; Disc?
 						JNZ not_disc_1
 
-						; Dysk!
+						; Disc!
 						CALL CalcDiscRayIntersection
 
 						OR EAX, 0
 						JZ end_primitives_1
 						MOV EAX, [NearestESI]
 						OR EAX, 0
-						JZ result_1					; Nie zostalo ustawione wiec od razu wpisuje.
+						JZ result_1					; Not zero so return result now.
 
-						; Sprawdzenie odleg³oœci.
+						; Checking distance.
 						MOVQ xmm0, [NearestDistance]
 						SUBSD xmm0, xmm5
 						MOVMSKPD EAX, xmm0
@@ -427,7 +426,7 @@ primitives_short_1:
 CalcRayIntersections	ENDP
 
 ;--------------------------------------------------------------------------------------------------------------------------------
-; Intersekcja promieñ - p³aszczyzna.
+; Intersection ray - plane.
 ;--------------------------------------------------------------------------------------------------------------------------------
 CalcPlaneRayIntersectionNormal	PROC
 								CVTPS2PD xmm0, qword ptr[ESI + 16]
@@ -435,10 +434,10 @@ CalcPlaneRayIntersectionNormal	PROC
 								RET
 CalcPlaneRayIntersectionNormal	ENDP
 
-; Parametry: XMM7 - Ÿród³o promienia, XMM6 - kierunek, ESI, XMM5 - wynik przeciêcia, XMM4 - odleg³oœci, EAX - wynik operacji.
+; Parameters: XMM7 - ray source, XMM6 - direction, ESI, XMM5 - result of intersection, XMM4 - distances, EAX - result of operation.
 CalcPlaneRayIntersection	PROC
 							; t = -(AX0 + BY0 + CZ0 + D) / (AXd + BYd + CZd) = -(Pn dot R0 + D) / (Pn dot Rd)
-							; Sprawdzamy czy: Pn dot Rd = 0.
+							; Checking: Pn dot Rd = 0.
 
 							CVTPS2PD xmm0, qword ptr [ESI + 16]
 							CVTPS2PD xmm1, qword ptr [ESI + 24]
@@ -486,9 +485,9 @@ end_ray_intersection:
 CalcPlaneRayIntersection	ENDP
 
 ;--------------------------------------------------------------------------------------------------------------------------------
-; Intersekcja promieñ - kula.
+; Intersection ray - ball.
 ;--------------------------------------------------------------------------------------------------------------------------------
-; Parametry: XMM0 - Intersection point, Wynik: XMM0
+; Parameters: XMM0 - intersection point, Result: XMM0
 CalcBallRayIntersectionNormal	PROC
 								MOVAPD xmm0, qword ptr [NearestIntersection]
 								MOVAPD xmm1, qword ptr [NearestIntersection + 16]
@@ -503,9 +502,9 @@ CalcBallRayIntersectionNormal	PROC
 								RET
 CalcBallRayIntersectionNormal	ENDP
 
-; Parametry: XMM7 - punkt startowy promienia, XMM6 - wektor kierunkowy, XMM5 - Intersection, Wynik: eax, esi - WskaŸnik na element.
+; Parameters: XMM7 - ray starting point, XMM6 - directional vector, XMM5 - intersection, Result: eax, esi - Pointer to element.
 CalcBallRayIntersection		PROC
-							; Ogólny zamys³ w C++:
+							; Generic algorithm in C++:
 							;
 							; Vec4 dst = ray.o - sphere.o;
 							; float B = dot(dst, ray.d);			// B really equals 2.0f this value.
@@ -530,7 +529,7 @@ CalcBallRayIntersection		PROC
 							MOVAPD xmm5, [CameraDirection]
 							MOVAPD xmm6, [CameraDirection+16]
 							HADDPD xmm2, xmm3
-							HADDPD xmm2, xmm2								; "prawie" B
+							HADDPD xmm2, xmm2								; "almost" B
 
 							MULPD xmm0, xmm0
 							MULPD xmm1, xmm1
@@ -553,9 +552,9 @@ CalcBallRayIntersection		PROC
 							SUBSD xmm0, xmm0
 							SUBSD xmm0, xmm2
 							SUBSD xmm0, xmm1
-							MOVLHPS xmm0, xmm0								; XMM0 = t0 (w calym rejestrze).
+							MOVLHPS xmm0, xmm0								; XMM0 = t0 (whole register).
 
-							; Sprawdzanie z ty³u.
+							; Checking from back.
 							MOVMSKPD EAX, xmm0
 							AND EAX, 1
 							JNZ end_ball_intersection
@@ -585,9 +584,9 @@ end_ball_intersection:
 CalcBallRayIntersection		ENDP
 
 ;--------------------------------------------------------------------------------------------------------------------------------
-; Intersekcja promieñ - cylinder.
+; Intersection ray - cylinder.
 ;--------------------------------------------------------------------------------------------------------------------------------
-; Parametry: XMM0, XMM1
+; Parameters: XMM0, XMM1
 CalcCylinderRayIntersectionNormal	PROC
 									MOVAPD xmm0, qword ptr [NearestIntersection]
 									MOVAPD xmm1, qword ptr [NearestIntersection + 16]
@@ -598,7 +597,7 @@ CalcCylinderRayIntersectionNormal	PROC
 									CVTPS2PD xmm4, qword ptr [ESI + 32]
 									CVTPS2PD xmm5, qword ptr [ESI + 40]					; Direction.
 
-									; Liczenie d³ugoœci.
+									; Calculating length.
 									MOVAPS xmm2, xmm4
 									MOVAPS xmm3, xmm5
 									MULPD xmm2, xmm2
@@ -613,7 +612,7 @@ CalcCylinderRayIntersectionNormal	PROC
 									HADDPD xmm0, xmm0									; t
 									DIVPD xmm0, xmm6
 
-									; Gotowy dotproduct.
+									; Result of dot product.
 									MOVAPD xmm2, xmm4
 									MOVAPD xmm3, xmm5
 									DIVPD xmm2, xmm6
@@ -623,12 +622,12 @@ CalcCylinderRayIntersectionNormal	PROC
 									CVTPS2PD xmm4, qword ptr [ESI + 16]
 									CVTPS2PD xmm5, qword ptr [ESI + 24]					; Root
 									ADDPD xmm2, xmm4
-									ADDPD xmm3, xmm5									; Pozycja na prostej.
+									ADDPD xmm3, xmm5									; Position on line.
 									MOVAPD xmm0, qword ptr [NearestIntersection]
 									MOVAPD xmm1, qword ptr [NearestIntersection + 16]
 									SUBPD xmm0, xmm2
 									SUBPD xmm1, xmm3
-									CVTPS2PD xmm2, qword ptr [ESI + 48]					; Promieñ podstawy.
+									CVTPS2PD xmm2, qword ptr [ESI + 48]					; Radius of base.
 									MOVLHPS xmm2, xmm2
 									DIVPD xmm0, xmm2
 									DIVPD xmm1, xmm2
@@ -646,7 +645,7 @@ CalcInfinityCylinderRayIntersection	PROC
 									CVTPS2PD xmm2, qword ptr [ESI + 32]
 									CVTPS2PD xmm3, qword ptr [ESI + 40]					; AB
 
-									; Poczatek wektorowego AO x AB.
+									; Start for cross product AO x AB.
 									PSHUFD xmm1, xmm1, 044h
 									PSHUFD xmm3, xmm3, 044h
 									PSHUFD xmm4, xmm2, 04Eh
@@ -660,22 +659,22 @@ CalcInfinityCylinderRayIntersection	PROC
 									HSUBPD xmm0, xmm0									; Z
 									SUBPD xmm3, xmm2
 
-									;	X w XMM3H
-									;	Y w XMM1L
-									;	Z w XMM0L
-									;	Pakujemy to do XMM6/XMM7.
+									;	X in XMM3H
+									;	Y in XMM1L
+									;	Z in XMM0L
+									;	Packing results into XMM6/XMM7.
 									MOVHLPS xmm6, xmm3
 									MOVLHPS xmm6, xmm1
-									MOVSD xmm7, [Zeroes4D]								; Czyszczenie.
+									MOVSD xmm7, [Zeroes4D]								; Clearing.
 									MOVQ xmm7, xmm0										; XMM6 XMM7 = AO x AB
 	
-									; Przygotowanie do kolejnego iloczynu wektorowego.
+									; Preparation to another cross product.
 									MOVAPD xmm0, qword ptr [CameraDirection]
 									MOVAPD xmm1, qword ptr [CameraDirection + 16]
 									CVTPS2PD xmm2, qword ptr [ESI + 32]
 									CVTPS2PD xmm3, qword ptr [ESI + 40]					; AB
 
-									; Poczatek: V x AB
+									; Start: V x AB
 									PSHUFD xmm1, xmm1, 044h
 									PSHUFD xmm3, xmm3, 044h
 									PSHUFD xmm4, xmm2, 04Eh
@@ -689,12 +688,12 @@ CalcInfinityCylinderRayIntersection	PROC
 									HSUBPD xmm0, xmm0									; Z
 									SUBPD xmm3, xmm2
 
-									;	X w XMM3H
-									;	Y w XMM1L
-									;	Z w XMM0L
+									;	X in XMM3H
+									;	Y in XMM1L
+									;	Z in XMM0L
 									MOVHLPS xmm4, xmm3
 									MOVLHPS xmm4, xmm1
-									MOVSD xmm5, [Zeroes4D]								; Czyszczenie.
+									MOVSD xmm5, [Zeroes4D]								; Clearing.
 									MOVQ xmm5, xmm0										; XMM4 XMM5 = V x AB
 	
 									CVTPS2PD xmm0, qword ptr [ESI + 32]
@@ -721,7 +720,7 @@ CalcInfinityCylinderRayIntersection	PROC
 									MULPD xmm6, xmm6
 									MULPD xmm7, xmm7
 									HADDPD xmm6, xmm7
-									HADDPD xmm6, xmm6									; "prawie" C.
+									HADDPD xmm6, xmm6									; "almost" C.
 									CVTPS2PD xmm7, qword ptr [ESI + 48]
 									PSHUFD xmm7, xmm7, 044h
 									MULPD xmm7, xmm7
@@ -733,7 +732,7 @@ CalcInfinityCylinderRayIntersection	PROC
 									MOVAPD xmm2, xmm1
 									MULPD xmm2, xmm6
 									ADDPD xmm2, xmm2
-									SUBPD xmm0, xmm2									; B^2-4AC - Magiczny wzór :P
+									SUBPD xmm0, xmm2									; B^2-4AC - Magical equation :P
 
 									MOVMSKPD EAX, xmm0
 									AND EAX, 1
@@ -780,7 +779,7 @@ cylinder_intersect_set_t2:
 									ADDPD xmm7, [CameraPosition + 16]					; Intersection point.
 									JMP cylinder_intersect_finalize
 cylinder_intersect_not_t2:
-									CMPPD xmm2, xmm3, 1									; XMM2 = t1 -> Rozwi¹zanie.
+									CMPPD xmm2, xmm3, 1									; XMM2 = t1 -> result.
 									MOVMSKPS EAX, xmm2
 									AND EAX, 1
 									JNZ cylinder_intersect_set_t1
@@ -805,7 +804,7 @@ end_cylinder_intersection:
 									RET
 CalcInfinityCylinderRayIntersection	ENDP
 
-; To co wy¿ej - ale sprawdzamy zakres t: 1 > t > 0
+; As above - but checking another range of t: 1 > t > 0
 CalcCylinderRayIntersection			PROC
 									MOVAPD xmm0, [CameraPosition]						; O
 									MOVAPD xmm1, [CameraPosition + 16]
@@ -816,7 +815,7 @@ CalcCylinderRayIntersection			PROC
 									CVTPS2PD xmm2, qword ptr [ESI + 32]
 									CVTPS2PD xmm3, qword ptr [ESI + 40]					; AB
 
-									; Poczatek wektorowego AO x AB.
+									; Start for cross product: AO x AB.
 									PSHUFD xmm1, xmm1, 044h
 									PSHUFD xmm3, xmm3, 044h
 									PSHUFD xmm4, xmm2, 04Eh
@@ -830,22 +829,22 @@ CalcCylinderRayIntersection			PROC
 									HSUBPD xmm0, xmm0									; Z
 									SUBPD xmm3, xmm2
 
-									;	X w XMM3H
-									;	Y w XMM1L
-									;	Z w XMM0L
-									;	Pakujemy to do XMM6/XMM7.
+									;	X in XMM3H
+									;	Y in XMM1L
+									;	Z in XMM0L
+									;	Packing resukt into XMM6/XMM7.
 									MOVHLPS xmm6, xmm3
 									MOVLHPS xmm6, xmm1
-									MOVSD xmm7, [Zeroes4D]								; Czyszczenie.
+									MOVSD xmm7, [Zeroes4D]								; Clearing.
 									MOVQ xmm7, xmm0										; XMM6 XMM7 = AO x AB
 	
-									; Przygotowanie do kolejnego iloczynu wektorowego.
+									; Preparation before next cross product.
 									MOVAPD xmm0, qword ptr [CameraDirection]
 									MOVAPD xmm1, qword ptr [CameraDirection + 16]
 									CVTPS2PD xmm2, qword ptr [ESI + 32]
 									CVTPS2PD xmm3, qword ptr [ESI + 40]					; AB
 
-									; Poczatek: V x AB
+									; Start: V x AB
 									PSHUFD xmm1, xmm1, 044h
 									PSHUFD xmm3, xmm3, 044h
 									PSHUFD xmm4, xmm2, 04Eh
@@ -859,12 +858,12 @@ CalcCylinderRayIntersection			PROC
 									HSUBPD xmm0, xmm0									; Z
 									SUBPD xmm3, xmm2
 
-									;	X w XMM3H
-									;	Y w XMM1L
-									;	Z w XMM0L
+									;	X in XMM3H
+									;	Y in XMM1L
+									;	Z in XMM0L
 									MOVHLPS xmm4, xmm3
 									MOVLHPS xmm4, xmm1
-									MOVSD xmm5, [Zeroes4D]								; Czyszczenie.
+									MOVSD xmm5, [Zeroes4D]								; Clearing.
 									MOVQ xmm5, xmm0										; XMM4 XMM5 = V x AB
 
 									CVTPS2PD xmm0, qword ptr [ESI + 32]
@@ -891,7 +890,7 @@ CalcCylinderRayIntersection			PROC
 									MULPD xmm6, xmm6
 									MULPD xmm7, xmm7
 									HADDPD xmm6, xmm7
-									HADDPD xmm6, xmm6									; "prawie" C
+									HADDPD xmm6, xmm6									; "almost" C
 									CVTPS2PD xmm7, qword ptr [ESI + 48]
 									PSHUFD xmm7, xmm7, 044h
 									MULPD xmm7, xmm7
@@ -1001,7 +1000,7 @@ end_cylinder_rayintersection:
 CalcCylinderRayIntersection			ENDP
 
 ;--------------------------------------------------------------------------------------------------------------------------------
-; Intersekcja promieñ - dysk.
+; Intersection ray - disc.
 ;--------------------------------------------------------------------------------------------------------------------------------
 CalcDiscRayIntersectionNormal	PROC
 								CVTPS2PD xmm0, qword ptr [ESI + 32]
@@ -1010,7 +1009,7 @@ CalcDiscRayIntersectionNormal	PROC
 CalcDiscRayIntersectionNormal	ENDP
 
 CalcDiscRayIntersection			PROC
-								; Wzór: intersekcja promieñ - p³aszczyzna + ograniczenia
+								; Equation: intersection = ray - plane + constraint
 								CVTPS2PD xmm0, qword ptr [ESI + 32]
 								CVTPS2PD xmm1, qword ptr [ESI + 40]
 								MOVAPD xmm2, [CameraPosition]
@@ -1049,7 +1048,7 @@ CalcDiscRayIntersection			PROC
 								HADDPD xmm5, xmm4
 								HADDPD xmm5, xmm5													; Distance ^ 2
 
-								; Sprawdzenie czy punkt nie jest dalej ni¿ kwadrat promienia.
+                                ; Is point further than squared ray length?
 								CVTPS2PD xmm0, qword ptr [ESI + 64]
 								MULSS xmm0, xmm0													; R ^ 2
 								CVTPS2PD xmm1, qword ptr [ESI + 16]
@@ -1073,7 +1072,7 @@ end_disc_intersection:
 CalcDiscRayIntersection			ENDP
 
 ;--------------------------------------------------------------------------------------------------------------------------------
-; Intersekcja promieñ - kula (fragment).
+; Intersection for ray and ball (segment).
 ;--------------------------------------------------------------------------------------------------------------------------------
 CheckBallSegmentIntersection		PROC
 									MOVAPS xmm3, xmm7
@@ -1101,7 +1100,7 @@ CheckBallSegmentIntersection		PROC
 									AND EAX, 1
 									JNZ end_ballfragment_intersection
 
-									; Kolizja!
+									; Collision!
 									; float t0 = (-B - sqrtD);
 									SQRTSS xmm0, xmm0
 									SUBSS xmm1, xmm1
@@ -1122,14 +1121,14 @@ CheckBallSegmentIntersection		PROC
 									MAXPS xmm0, xmm7								; MAX
 									SUBPS xmm0, xmm2
 
-									CMPPS xmm1, xmm4, 2								; Minimum mniejsze od intersekcji.
+									CMPPS xmm1, xmm4, 2								; MIN is less than intersection.
 									MOVMSKPS EAX, xmm1
 									AND EAX, 7
 									SUB EAX, 7
 									JNZ end_ballfragment_collision
 									JMP end_ballfragment_intersection
 
-									CMPPS xmm0, xmm4, 5								; Maximum wieksze od intersekcji.
+									CMPPS xmm0, xmm4, 5								; MAX is greater than intersection.
 									MOVMSKPS EAX, xmm0
 									AND EAX, 7
 									SUB EAX, 7
@@ -1147,11 +1146,11 @@ end_ballfragment_intersection:
 CheckBallSegmentIntersection		ENDP
 
 ;--------------------------------------------------------------------------------------------------------------------------------
-; Funkcja zarz¹dzaj¹ca œwiat³ami - sprawdza dostêpnoœæ œwiat³a i generuje promienie.
+; Procedure for checking ray to light intersection with recognition many types of ligting.
 ;--------------------------------------------------------------------------------------------------------------------------------
-; Parametry: XMM7 - intersection point, XMM5 - wynik wspó³czynnika.
+; Parameters: XMM7 - intersection point, XMM5 - result.
 CheckLightsRayIntersections	PROC
-							MOVAPS xmm7, dword ptr [Zeroes4D]				; Zerowanie XMM7.
+							MOVAPS xmm7, dword ptr [Zeroes4D]				; Clearing XMM7.
 							MOV EDI, Lights
 							MOV ECX, [EDI]
 							OR ECX, 0
@@ -1189,7 +1188,7 @@ not_cylinder_3:
 skip_3:
 							MOV EAX, [EDI + 12]
 							AND EAX, 0F0000H
-							CMP EAX, 010000H								; Œwiat³o punktowe?
+							CMP EAX, 010000H								; Point lighting?
 							JNZ not_omni
 
 							; float atten;
@@ -1203,25 +1202,25 @@ skip_3:
 							; return color * atten * nDotL;
 							;
 							; nDotL = XMM0
-							CVTPS2PD xmm2, qword ptr [EDI + 16]				; Pozycja œwiat³a.
-							CVTPS2PD xmm3, qword ptr [EDI + 24]				; Pozycja œwiat³a.
+							CVTPS2PD xmm2, qword ptr [EDI + 16]				; Light position.
+							CVTPS2PD xmm3, qword ptr [EDI + 24]				; Light position.
 							SUBPD xmm2, [NearestIntersection]
-							SUBPD xmm3, [NearestIntersection + 16]			; Wektor œwiat³o->kolizja.
+							SUBPD xmm3, [NearestIntersection + 16]			; Vector light->collision.
 							CVTPS2PD xmm4, qword ptr [EDI + 48]
 							MOVLHPS xmm4, xmm4
 							DIVPD xmm2, xmm4								; lightDir
 							DIVPD xmm3, xmm4								; lightDir
 
-							; Normalizacja wektora.
+							; Vector normalization.
 							MOVAPD xmm4, xmm2
 							MOVAPD xmm5, xmm3
 							MULPD xmm4, xmm4
 							MULPD xmm5, xmm5
 							HADDPD xmm4, xmm5
-							HADDPD xmm4, xmm4								; XMM3 = D³ugoœæ ^ 2 wektora.
-							MOVAPD xmm5, xmm4								; XMM5 = D³ugoœæ ^ 2.
-							SQRTPD xmm4, xmm4								; XMM3 = D³ugoœæ wektora.
-							DIVPD xmm2, xmm4								; Wektor œwiat³o -> kolizja znormalizowany.
+							HADDPD xmm4, xmm4								; XMM3 = Vector length ^ 2 .
+							MOVAPD xmm5, xmm4								; XMM5 = Length ^ 2.
+							SQRTPD xmm4, xmm4								; XMM3 = Vector length.
+							DIVPD xmm2, xmm4								; Normalized vector for light -> collision.
 							DIVPD xmm3, xmm4
 
 							MOVAPD xmm6, [Ones4D]
@@ -1242,7 +1241,7 @@ skip_3:
 							CVTPD2PS xmm0, xmm0
 							PSHUFD xmm0, xmm0, 0
 
-							MOVAPS xmm6, [EDI + 32]							; £adujemy kolor œwiate³ka.
+							MOVAPS xmm6, [EDI + 32]							; Loading color of light.
 
 							MOVAPS xmm1, [Ones4F]
 							MINPS xmm5, xmm1
@@ -1261,7 +1260,7 @@ skip_3:
 							MAXPS xmm7, xmm1
 							JMP end_2
 not_omni:
-							CMP EAX, 020000H								; Œwiat³o globalne?
+							CMP EAX, 020000H								; Global lighting?
 							JNZ not_world
 
 							; float fdot;
@@ -1269,7 +1268,7 @@ not_omni:
 							;		return vec3(0,0,0);
 							; return color * (-fdot);
 
-							CVTPS2PD xmm2, qword ptr [EDI + 16]				; Kierunek œwiat³a.
+							CVTPS2PD xmm2, qword ptr [EDI + 16]				; Light direction.
 							CVTPS2PD xmm3, qword ptr [EDI + 24]
 							MULPD xmm2, xmm0								; * Normal.
 							MULPD xmm3, xmm1	
@@ -1278,8 +1277,8 @@ not_omni:
 							MOVAPD xmm3, [MinusOnes4D]
 							MULPD xmm2, xmm3
 							CVTPD2PS xmm2, xmm2
-							PSHUFD xmm2, xmm2, 0							; Zamiana na float.
-							MOVAPS xmm6, [EDI + 32]							; £adujemy kolor œwiate³ka.
+							PSHUFD xmm2, xmm2, 0							; Conversion to float.
+							MOVAPS xmm6, [EDI + 32]							; Loading lighting color.
 
 							MULPS xmm6, xmm2
 							MOVAPS xmm1, [Ones4F]
@@ -1306,11 +1305,11 @@ not_world:
 							; float nDotL = saturate(dot(vt.normal, l));
 							; return color * nDotL * atten;
 
-							CVTPS2PD xmm2, qword ptr [EDI + 16]				; Pozycja œwiat³a.
-							CVTPS2PD xmm3, qword ptr [EDI + 24]				; Pozycja œwiat³a.
+							CVTPS2PD xmm2, qword ptr [EDI + 16]				; Light position.
+							CVTPS2PD xmm3, qword ptr [EDI + 24]				; Light position.
 							SUBPD xmm2, [NearestIntersection]
-							SUBPD xmm3, [NearestIntersection+16]			; Wektor swiatlo->kolizja czyli ray.direction
-							; ... jeszcze L
+							SUBPD xmm3, [NearestIntersection+16]			; Vector for light -> collision named as 'ray.direction'
+							; ... and L 
 
 							; nDotL
 							MOVAPD xmm5, xmm2
@@ -1319,7 +1318,7 @@ not_world:
 							MULPD xmm6, xmm6
 							HADDPD xmm5, xmm6
 							HADDPD xmm5, xmm5
-							SQRTPD xmm6, xmm5								; D³ugoœæ.
+							SQRTPD xmm6, xmm5								; Length.
 							MULPD xmm0, xmm2
 							MULPD xmm1, xmm3
 							DIVPD xmm0, xmm6
@@ -1359,7 +1358,7 @@ not_world:
 							MULPD xmm4, xmm4
 							MULPD xmm4, xmm5								; SmoothStep
 
-							; ... saturacja NdotL i SmoothStep
+							; ... saturation NdotL and SmoothStep
 							MOVAPD xmm5, [Ones4D]
 							MINPD xmm4, xmm5
 							MINPD xmm0, xmm5
@@ -1367,9 +1366,9 @@ not_world:
 							MAXPD xmm4, xmm5
 							MAXPD xmm0, xmm5
 
-							; Liczenie lightDir
+							; Calculating lightDir
 							CVTPS2PD xmm5, qword ptr [EDI + 80]
-							MOVLHPS xmm5, xmm5								; Promieñ na ca³ej linii.
+							MOVLHPS xmm5, xmm5								; Ray of light on line.
 							DIVPD xmm2, xmm5
 							DIVPD xmm3, xmm5								; lightDir
 
@@ -1381,7 +1380,7 @@ not_world:
 							MOVAPD xmm3, [Ones4D]
 							SUBPD xmm3, xmm2								; Attenuation
 
-							; Desaturacja.
+							; Desaturation.
 							MOVAPD xmm5, [Ones4D]
 							MINPD xmm3, xmm5
 							MOVAPD xmm5, [Zeroes4D]
