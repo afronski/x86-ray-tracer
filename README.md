@@ -3,7 +3,7 @@
 Ray tracer written in x86 assembler (with usage of SSE/SSE2 extensions).
 
 Command line, reading *scene* files, saving logs and displaying rendered scene written in *C++* with *SDL* library.
-Rest of application is written in pure assembler (*Why? Because I can!*).
+Rest of application is written in pure assembler ( *Why? Because I can!* ).
 
 Screenshots:
 
